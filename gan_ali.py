@@ -8,7 +8,12 @@ class GAN_ALI(GAN_base):
     def __init__(self, dataset):
         # super().__init__()
         self.dataset = dataset
-        self.encoding = dataset.encoder(dataset.real_images)
+
+        # self.encoding = dataset.encoder(dataset.real_images)
+        eps = tf.truncated_normal([None, self.dataset.z_size])
+        mu, log_sigma_sq = dataset.encoder(dataset.real_images)
+        self.encoding = mu + eps * tf.sqrt(tf.exp(log_sigma_sq))
+
         self.gen_images = dataset.generator(dataset.z)
 
         self.real_logits = dataset.discriminator((dataset.real_images, self.encoding))

@@ -43,7 +43,7 @@ class GAN_base:
 
     def discriminator_train_op(self):
         variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
-        return GAN_base.get_train_op(self.generator_loss, variables)
+        return GAN_base.get_train_op(self.discriminator_loss, variables)
     
     def get_noise_sample(self, batch_size):
         return np.random.uniform(low=-1, high=1, size=(batch_size, self.dataset.z_size))
@@ -68,12 +68,12 @@ class GAN_base:
             z = self.get_noise_sample(image_batch.shape[0])
             gen_loss, discrim_loss = self.train_one_step(image_batch, z)
 
-            if i % 100 == 0:
+            if i % 20 == 0:
                 print('Step %d, gen_loss: %f, discrim_loss: %f' % (i, gen_loss, discrim_loss))
 
     def generate(self, num_images):
         z = self.get_noise_sample(num_images)
-        x = self.dataset.data.train.next_batch(100)[0]
-        encoding = self.sess.run(self.encoding, feed_dict={self.dataset.real_images: x})
-        gen_images = self.sess.run(self.gen_images, feed_dict={self.dataset.z: encoding})
+        # x = self.dataset.data.train.next_batch(100)[0]
+        # encoding = self.sess.run(self.encoding, feed_dict={self.dataset.real_images: x})
+        gen_images = self.sess.run(self.gen_images, feed_dict={self.dataset.z: z})
         return gen_images

@@ -18,8 +18,10 @@ class MNIST_ALI(MNIST_base):
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
                 tmp = tf.reshape(tmp, [-1, 7 * 7 * 256])  # FIXME
-                enc = slim.fully_connected(tmp, self.z_size, activation_fn=None)
-                return enc
+                #enc = slim.fully_connected(tmp, self.z_size, activation_fn=None)
+                mu = slim.fully_connected(tmp, self.z_size, activation_fn=None)
+                log_sigma_sq = slim.fully_connected(tmp, self.z_size, activation_fn=None)
+                return mu, log_sigma_sq
 
     def discriminator(self, x, reuse=False):
         x, z = x
