@@ -1,16 +1,21 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import ImageGrid
 import sys
 
-import mnist
-import gan
+from mnist import MNIST_base
+from mnist_ali import MNIST_ALI
+from gan import GAN_base
+from gan_ali import GAN_ALI
+from mpl_toolkits.axes_grid1 import ImageGrid
 
-class GAN_MNIST(mnist.MNIST_base, gan.GAN_base):
-    def __init__(self, activation_fn=tf.nn.relu):
-        mnist.MNIST_base.__init__(self, activation_fn=activation_fn)
-        gan.GAN_base.__init__(self)
+
+# class GAN_MNIST(mnist.MNIST_base, gan.GAN_base):
+#     def __init__(self, activation_fn=tf.nn.relu):
+#         mnist.MNIST_base.__init__(self, activation_fn=activation_fn)
+#         gan.GAN_base.__init__(self)
+#         gan.run_session(self)
+
 
 def image_grid(images, size):
     fig = plt.figure()
@@ -24,11 +29,22 @@ def image_grid(images, size):
 
 
 with tf.Graph().as_default():
-    model = GAN_MNIST()
+    # model = GAN_MNIST()
+    # dataset = MNIST_base()
+    # gan = GAN_base(dataset)
+    dataset = MNIST_ALI()
+    gan = GAN_ALI(dataset)
 
-model.train(int(sys.argv[1]), 64)
-gen_images = model.generate(100)
-image_grid(gen_images, (10,10))
+gan.train(int(sys.argv[1]), 64)
+gen_images = gan.generate(100)
+image_grid(gen_images, (10, 10))
 
 plt.show()
+
+
+# model.train(int(sys.argv[1]), 64)
+# gen_images = model.generate(100)
+# image_grid(gen_images, (10,10))
+#
+# plt.show()
 

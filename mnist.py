@@ -1,6 +1,8 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+
 from tensorflow.contrib.learn.python.learn.datasets import mnist
+
 
 class MNIST_base:
     
