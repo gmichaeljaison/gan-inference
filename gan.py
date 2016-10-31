@@ -12,24 +12,38 @@ class GAN_base:
         self.gen_logits = dataset.discriminator(self.gen_images, reuse=True)
 
         self.generator_loss, self.discriminator_loss = self.losses()
-        self.gen_train_op = self.get_train_op(self.generator_loss, net='generator')
-        self.discrim_train_op = self.get_train_op(self.discriminator_loss, net='discriminator')
+        self.gen_train_op = self.generator_train_op()
+        self.discrim_train_op = self.discriminator_train_op()
 
         self.sess = tf.Session()
         self.sess.run(tf.initialize_all_variables())
 
     def losses(self):
-        real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(self.real_logits, tf.ones_like(self.real_logits)))
-        gen_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(self.gen_logits, tf.zeros_like(self.gen_logits)))
+        real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            self.real_logits, tf.ones_like(self.real_logits)))
+        gen_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            self.gen_logits, tf.zeros_like(self.gen_logits)))
         discriminator_loss = tf.add(real_loss, gen_loss, name='discriminator_loss')
 
-        generator_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(self.gen_logits, tf.ones_like(self.gen_logits)), name='generator_loss')
+        # generator_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        #     self.gen_logits, tf.ones_like(self.gen_logits)), name='generator_loss')
+        generator_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+            self.gen_logits, tf.ones_like(self.gen_logits)))
         return generator_loss, discriminator_loss
 
-    def get_train_op(self, loss, net=None):
-        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, net)
+    @staticmethod
+    def get_train_op(loss, variables):
+        # variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, net)
         train_op = tf.train.AdamOptimizer(0.0003, beta1=0.5).minimize(loss, var_list=variables)
         return train_op
+
+    def generator_train_op(self):
+        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator')
+        return GAN_base.get_train_op(self.generator_loss, variables)
+
+    def discriminator_train_op(self):
+        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
+        return GAN_base.get_train_op(self.generator_loss, variables)
     
     def get_noise_sample(self, batch_size):
         return np.random.uniform(low=-1, high=1, size=(batch_size, self.dataset.z_size))
@@ -37,7 +51,7 @@ class GAN_base:
     def train_one_step(self, image_batch, z):
         # train generator
         _, gen_loss_value = self.sess.run([self.gen_train_op, self.generator_loss],
-                                      feed_dict={self.z: z})
+                                      feed_dict={self.dataset.real_images: image_batch, self.dataset.z: z})
         assert not np.isnan(gen_loss_value), 'Model diverged with generator NaN loss value'
 
         # train discriminator
@@ -59,5 +73,7 @@ class GAN_base:
 
     def generate(self, num_images):
         z = self.get_noise_sample(num_images)
-        gen_images = self.sess.run(self.gen_images, feed_dict={self.dataset.z: z})
+        x = self.dataset.data.train.next_batch(100)[0]
+        encoding = self.sess.run(self.encoding, feed_dict={self.dataset.real_images: x})
+        gen_images = self.sess.run(self.gen_images, feed_dict={self.dataset.z: encoding})
         return gen_images
