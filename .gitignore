@@ -1,4 +1,8 @@
+# Project specific
+MNIST-data/
+
 # OS & IDE
+.DS_Store
 .idea/
 *.sw*
 *.*~
