@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import ImageGrid
 
 class GAN_base:
 
@@ -68,12 +69,25 @@ class GAN_base:
             z = self.get_noise_sample(image_batch.shape[0])
             gen_loss, discrim_loss = self.train_one_step(image_batch, z)
 
-            if i % 20 == 0:
+            if i % 100 == 0:
                 print('Step %d, gen_loss: %f, discrim_loss: %f' % (i, gen_loss, discrim_loss))
 
     def generate(self, num_images):
         z = self.get_noise_sample(num_images)
-        # x = self.dataset.data.train.next_batch(100)[0]
-        # encoding = self.sess.run(self.encoding, feed_dict={self.dataset.real_images: x})
+        x = self.dataset.data.train.next_batch(64)[0]
+        encoding = self.sess.run(self.encoding, feed_dict={self.dataset.real_images: x})
         gen_images = self.sess.run(self.gen_images, feed_dict={self.dataset.z: z})
+
+        image_grid(x,(8,8))
+        plt.show()
         return gen_images
+
+def image_grid(images, size):
+    fig = plt.figure()
+    grid = ImageGrid(fig, 111, nrows_ncols=size, axes_pad=0.1)
+    for i in xrange(size[0] * size[1]):
+        im = np.reshape(images[i], (28, 28))
+        axis = grid[i]
+        axis.axis('off')
+        axis.imshow(im, cmap='gray')
+    return fig

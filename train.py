@@ -37,8 +37,8 @@ with tf.Graph().as_default():
 
 gan.train(int(sys.argv[1]), 64)
 gen_images = gan.generate(100)
-image_grid(gen_images, (10, 10))
 
+image_grid(gen_images, (10, 10))
 plt.show()
 
 

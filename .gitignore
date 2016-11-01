@@ -1,5 +1,7 @@
 # OS & IDE
 .idea/
+*.sw*
+*.*~
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

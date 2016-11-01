@@ -10,9 +10,9 @@ class GAN_ALI(GAN_base):
         self.dataset = dataset
 
         # self.encoding = dataset.encoder(dataset.real_images)
-        eps = tf.truncated_normal([None, self.dataset.z_size])
+        eps = tf.truncated_normal([64, self.dataset.z_size])
         mu, log_sigma_sq = dataset.encoder(dataset.real_images)
-        self.encoding = mu + eps * tf.sqrt(tf.exp(log_sigma_sq))
+        self.encoding = mu + eps * tf.exp(log_sigma_sq)
 
         self.gen_images = dataset.generator(dataset.z)
 

@@ -36,10 +36,10 @@ class MNIST_ALI(MNIST_base):
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
                 tmp = tf.reshape(tmp, [-1, 7 * 7 * 256])  # FIXME
-                x_disc = slim.fully_connected(tmp, 128, activation_fn=None)
+                x_disc = slim.fully_connected(tmp, 128)
 
                 tmp = slim.fully_connected(z, 128)
-                z_disc = slim.fully_connected(tmp, 128, activation_fn=None)
+                z_disc = slim.fully_connected(tmp, 128)
 
                 joint_inp = tf.concat(1, [x_disc, z_disc])
                 tmp = slim.fully_connected(joint_inp, 256)
