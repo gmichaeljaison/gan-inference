@@ -28,7 +28,7 @@ class MNIST_base:
                 tmp = tf.reshape(x, [-1, 28, 28, 1])
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
-                logits = slim.fully_connected(tmp, 1, activation_fn=None)
+                logits = slim.fully_connected(slim.flatten(tmp), 1, activation_fn=None)
                 return logits
 
     def generator(self, z):
@@ -40,7 +40,7 @@ class MNIST_base:
                 tmp = tf.reshape(tmp, [-1, 7, 7, 256])
                 tmp = slim.conv2d_transpose(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d_transpose(tmp, 1, 5, stride=2, activation_fn=tf.nn.sigmoid)
-                gen_images = tf.reshape(tmp, [-1, 784])
+                gen_images = slim.flatten(tmp)
                 return gen_images
 
     def next_batch(self, batch_size):
