@@ -1,11 +1,15 @@
 import sys
+import os.path as osp
+import time
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.axes_grid1 import ImageGrid
-from dataset import GanMnist, GanAliMnist
-from gan import GanBase, GanAli
+from datasets import GanMnist, GanAliMnist
+from gans.gan import GanBase, GanAli
+
+_save_dir = 'models/'
 
 
 def image_grid(images, size):
@@ -19,7 +23,7 @@ def image_grid(images, size):
     return fig
 
 
-def train(gan, steps):
+def train(gan, steps, method):
     with tf.Graph().as_default():
         for step, gen_loss, disc_loss in gan.train(steps):
             if step % 100 == 0:
@@ -27,6 +31,10 @@ def train(gan, steps):
                       .format(step, gen_loss, disc_loss))
 
     # TODO save model after training (tensorflow save?)
+    fname = '{}-{}.ckpt'.format(method, int(time.time()))
+    saver = tf.train.Saver()
+    saver.save(gan.sess, osp.join(_save_dir, fname))
+    print('model saved as {}'.format(fname))
 
 
 def test(gan):
@@ -51,9 +59,10 @@ def main():
         dataset = GanAliMnist(z_size, batch_size)
         gan = GanAli(dataset)
 
-    train(gan, steps)
+    train(gan, steps, method)
     test(gan)
 
 
 if __name__ == '__main__':
     main()
+

@@ -1,5 +1,6 @@
 # Project specific
 MNIST-data/
+models/
 
 # OS & IDE
 .DS_Store

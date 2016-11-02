@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 from tensorflow.contrib.learn.python.learn.datasets import mnist
-from dataset.dataset import GanDataset
+from dataset import GanDataset
 
 
 class GanMnist(GanDataset):
@@ -25,6 +25,9 @@ class GanMnist(GanDataset):
                 tmp = tf.reshape(x, [-1, 28, 28, 1])
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
+                print(tmp.get_shape())
+                tmp = slim.flatten(tmp)
+                print(tmp.get_shape())
                 logits = slim.fully_connected(tmp, 1, activation_fn=None)
                 return logits
 
@@ -56,7 +59,8 @@ class GanAliMnist(GanMnist):
                 tmp = tf.reshape(x, [-1, 28, 28, 1])
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
-                tmp = tf.reshape(tmp, [-1, 7*7*256])
+                # tmp = tf.reshape(tmp, [-1, 7*7*256])
+                tmp = slim.flatten(tmp)
                 mu = slim.fully_connected(tmp, self.z_size, activation_fn=None)
                 log_sigma = slim.fully_connected(tmp, self.z_size, activation_fn=None)
                 return mu, log_sigma
@@ -81,7 +85,8 @@ class GanAliMnist(GanMnist):
                 tmp = tf.reshape(x, [-1, 28, 28, 1])
                 tmp = slim.conv2d(tmp, 128, 5, stride=2)
                 tmp = slim.conv2d(tmp, 256, 5, stride=2)
-                tmp = tf.reshape(tmp, [-1, 7*7*256])
+                # tmp = tf.reshape(tmp, [-1, 7*7*256])
+                tmp = slim.flatten(tmp)
                 x_disc = slim.fully_connected(tmp, 128)
 
                 tmp = slim.fully_connected(z, 128)

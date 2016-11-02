@@ -17,11 +17,6 @@ class GanBase:
         self.generator = self.build_generator()
         self.discriminator = self.build_discriminator()
 
-        # self.gen_images = self.dataset.generator(self.get_gen_input())
-
-        # self.real_logits = self.dataset.discriminator(self.get_disc_real_input())
-        # self.gen_logits = self.dataset.discriminator(self.get_disc_gen_input(), reuse=True)
-
         self.generator_loss, self.discriminator_loss = self.losses()
 
         self.gen_train_op = self.generator_train_op()
