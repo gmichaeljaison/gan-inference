@@ -17,10 +17,12 @@ class MNIST:
         self.data = data
 
         self.z_size = 32
+        self.x_size = 28*28
         self.real_images = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
         self.z_sampled = tf.placeholder(tf.float32, [None, self.z_size])
 
     def encoder(self, x):
+        features = []
         with tf.variable_scope('encoder'):
             with slim.arg_scope([slim.fully_connected, slim.conv2d],
                                 activation_fn=custom_ops.leaky_relu,
@@ -32,17 +34,16 @@ class MNIST:
                 tmp = slim.conv2d(tmp, 256, 4, stride=2, padding='VALID')
                 assert tmp.get_shape().as_list() == [None, 3, 3, 256]
                 tmp = slim.flatten(tmp)
+                features.append(tmp)
                 tmp = slim.fully_connected(tmp, 512)
+                features.append(tmp)
                 tmp = slim.fully_connected(tmp, 512)
+                features.append(tmp)
                 mu = slim.fully_connected(tmp, self.z_size, activation_fn=None, normalizer_fn=None)
+                features.append(mu)
                 log_sigma = slim.fully_connected(tmp, self.z_size, activation_fn=None, normalizer_fn=None)
-                eps = tf.truncated_normal([tf.shape(mu)[0], self.z_size])
-                z = mu + eps*tf.exp(log_sigma)
-                #z = mu
 
-                # FIXME: doing the reparameterization trick makes generator loss huge
-                # it is not stricly necessary, but right now the encoder is deterministic
-                return z
+                return mu, log_sigma, tf.concat(1, features)
 
     def discriminator(self, x, reuse=False, ALI=False, get_features=False):
         if ALI:
@@ -72,6 +73,9 @@ class MNIST:
                 # what layer should this be at?
                 minibatch_discrim = custom_ops.minibatch_discrimination(tmp, 100)
 
+                # what layer should this be at?
+                features = tmp
+
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.fully_connected(tmp, 512)
 
@@ -94,6 +98,8 @@ class MNIST:
                 # what layer should this be concatenated at?
                 tmp = tf.concat(1, [tmp, minibatch_discrim])
                 logits = slim.fully_connected(tmp, 1, activation_fn=None)
+                if get_features:
+                    return logits, features
                 return logits
 
     def generator(self, z):

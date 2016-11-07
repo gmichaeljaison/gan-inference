@@ -1,12 +1,11 @@
-import tensorflow as tf
+#import tensorflow as tf
 import matplotlib.pyplot as plt
+import sys
 
 import models
 import utils
 
-with tf.Graph().as_default():
-    model = models.MNIST_ALI()
-
+model = models.get_model(sys.argv[1])
 model.restore()
 z = model.get_noise_sample(100)
 gen_images = model.generate(z)

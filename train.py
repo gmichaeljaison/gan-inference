@@ -1,10 +1,9 @@
-import tensorflow as tf
 import sys
 
 import models
 
-with tf.Graph().as_default():
-    model = models.MNIST_ALI()
+BATCH_SIZE = 64
 
-model.train(int(sys.argv[1]), 64)
+model = models.get_model(sys.argv[1])
+model.train(int(sys.argv[2]), BATCH_SIZE)
 
