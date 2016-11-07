@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os.path
 
 class Model_Base:
 
@@ -23,6 +24,6 @@ class Model_Base:
         return features
 
     def restore(self):
-        ckpt = tf.train.latest_checkpoint(self.save_dir)
+        ckpt = tf.train.latest_checkpoint(os.path.join('./log', self.name))
         self.saver.restore(self.sess, ckpt)
 

@@ -6,7 +6,16 @@ from model_base import Model_Base
 
 class ALI(Model_Base):
 
-    def __init__(self):
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.encoder = self.dataset.encoder
+        self.generator = self.dataset.generator
+        self.discriminator = self.dataset.discriminator
+        self.x_size = self.dataset.x_size
+        self.z_size = self.dataset.z_size
+        self.real_images = self.dataset.real_images
+        self.z_sampled = self.dataset.z_sampled
+
         self.gen_images = self.generator(self.z_sampled)
 
         mu, log_sigma, self.encoder_features = self.encoder(self.real_images)
@@ -22,6 +31,9 @@ class ALI(Model_Base):
         
         Model_Base.__init__(self)
         self.init_op = tf.initialize_all_variables()
+
+        self.name = self.dataset.name + '_ALI'
+        self.save_dir = os.path.join('./log', self.name)
 
     def losses(self):
         zeros = tf.zeros_like(self.real_logits)
@@ -70,7 +82,7 @@ class ALI(Model_Base):
 
         self.sess.run(self.init_op)
         for i in xrange(steps):
-            image_batch = self.next_batch(batch_size)
+            image_batch = self.dataset.next_batch(batch_size)
             z = self.get_noise_sample(image_batch.shape[0])
             gen_loss, discrim_loss = self.train_one_step(image_batch, z)
 

@@ -21,6 +21,8 @@ class MNIST:
         self.real_images = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
         self.z_sampled = tf.placeholder(tf.float32, [None, self.z_size])
 
+        self.name = 'MNIST'
+
     def encoder(self, x):
         features = []
         with tf.variable_scope('encoder'):
