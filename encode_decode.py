@@ -8,7 +8,7 @@ import utils
 model = models.get_model(sys.argv[1])
 model.restore()
 
-image_batch = model.data.validation.next_batch(100)[0]
+image_batch = model.dataset.data.validation.next_batch(100)[0]
 z = model.inference(image_batch)
 gen_images = model.generate(z)
 
