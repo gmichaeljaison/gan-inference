@@ -18,19 +18,25 @@ class ALI(Model_Base):
         self.z_sampled = self.dataset.z_sampled
 
         self.gen_images = self.generator(self.z_sampled)
+        print('generator done')
 
         mu, log_sigma, self.encoder_features = self.encoder(self.real_images)
         eps = tf.truncated_normal([tf.shape(mu)[0], self.z_size])
         self.z_encoded = mu + eps*tf.exp(log_sigma)
+        print('encoder done')
 
         self.real_logits = self.discriminator((self.real_images, self.z_encoded), ALI=True)
         self.gen_logits = self.discriminator((self.gen_images, self.z_sampled), ALI=True, reuse=True)
+        print('disc done')
 
         self.generator_loss, self.discriminator_loss = self.losses()
+        print('losses done')
         self.gen_train_op = self.get_train_op(self.generator_loss, net='generator')
         self.discrim_train_op = self.get_train_op(self.discriminator_loss, net='discriminator')
+        print('op done')
         
         Model_Base.__init__(self)
+        print('model base initiated')
         self.init_op = tf.initialize_all_variables()
 
         self.name = self.dataset.name + '_ALI'
@@ -91,5 +97,7 @@ class ALI(Model_Base):
                 print('Step {}, gen_loss = {}, discrim_loss = {}'.format(i, gen_loss, discrim_loss))
 
             if i % 1000 == 0 or (i+1) == steps:
+                print('save', self.save_dir)
                 self.saver.save(self.sess, os.path.join(self.save_dir, self.name), global_step=i)
+                print('saved model')
 

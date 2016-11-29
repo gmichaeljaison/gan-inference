@@ -22,6 +22,7 @@ def get_model(name):
             raise NotImplementedError
 
         if model == 'ALI':
+            print('michael i sgood')
             return ALI(dataset)
         elif model == 'VAE':
             return VAE(dataset)

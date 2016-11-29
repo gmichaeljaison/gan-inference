@@ -161,14 +161,12 @@ def crop_and_resize(im, crop_s, reshape=None):
 def crop_and_save():
     from cv_utils import img_utils
 
-    data_dir = 'data/celeba-1100'
+    data_dir = 'data/celeba'
     out_dir = 'data/celeba-cropped'
     for n, fname in enumerate(os.listdir(data_dir)):
         print(n)
         im = cv.imread(osp.join(data_dir, fname))
         cim = crop_and_resize(im, (120, 120), (64, 64))
-        if n < 3:
-            img_utils.imshow(im, cim)
         cv.imwrite(osp.join(out_dir, 'crop-{}.jpg'.format(n+1)), cim)
 
 

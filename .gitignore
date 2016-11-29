@@ -4,7 +4,10 @@ log/
 
 # Python
 __pycache__/
+*.pyc
 
 # OS and IDE specific
 .idea/
 .DS_Store
+*.sw*
+*.vim

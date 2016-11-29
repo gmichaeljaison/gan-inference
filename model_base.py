@@ -6,7 +6,9 @@ class Model_Base:
 
     def __init__(self):
         self.saver = tf.train.Saver(max_to_keep=1)
+        print('before sess')
         self.sess = tf.Session()
+        print('after sess')
 
     def get_noise_sample(self, batch_size):
         return np.random.normal(scale=1, size=(batch_size, self.z_size))
