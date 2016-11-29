@@ -1,0 +1,10 @@
+# Project
+data/*
+log/
+
+# Python
+__pycache__/
+
+# OS and IDE specific
+.idea/
+.DS_Store

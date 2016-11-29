@@ -14,10 +14,10 @@ with open('./features_datasets/%s.pkl' % sys.argv[1], 'rb') as f:
 model = svm.LinearSVC(C=1.0, loss='hinge', penalty='l2')
 K = 50
 avg_err = 0
-for i in xrange(K):
+for i in range(K):
     X, y = random_samples(dataset['train'], 100)
     model.fit(X, y)
     avg_err += 1 - model.score(*dataset['validation'])
 avg_err /= K
-print 'Average validation error: %f%%' % (100*avg_err)
+print('Average validation error: %f%%' % (100*avg_err))
 

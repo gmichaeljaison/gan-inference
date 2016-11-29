@@ -75,19 +75,19 @@ class VAEGAN(Model_Base):
 
         return gen_loss_value, discrim_loss_value
 
-    def train(self, steps, batch_size):
+    def train(self, steps):
         if tf.gfile.Exists(self.save_dir):
             tf.gfile.DeleteRecursively(self.save_dir)
         tf.gfile.MakeDirs(self.save_dir)
 
         self.sess.run(self.init_op)
-        for i in xrange(steps):
-            image_batch = self.dataset.next_batch(batch_size)
+        for i in range(steps):
+            image_batch = self.dataset.next_batch()
             #z = self.get_noise_sample(image_batch.shape[0])
             gen_loss, discrim_loss = self.train_one_step(image_batch)
 
             if i % 10 == 0:
-                print 'Step %d, gen_loss = %f, discrim_loss = %f' % (i, gen_loss, discrim_loss)
+                print('Step {}, gen_loss = {}, discrim_loss = {}'.format(i, gen_loss, discrim_loss))
 
             if i % 1000 == 0 or (i+1) == steps:
                 self.saver.save(self.sess, os.path.join(self.save_dir, self.name), global_step=i)

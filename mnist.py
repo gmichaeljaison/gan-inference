@@ -8,7 +8,9 @@ INIT = lambda: tf.truncated_normal_initializer(stddev=0.01)
 
 class MNIST:
 
-    def __init__(self):
+    def __init__(self, batch_size):
+        self.batch_size = batch_size
+
         data = mnist.read_data_sets('MNIST_data')
         # reshape
         data.train._images = data.train._images.reshape([-1, 28, 28, 1])
@@ -81,7 +83,6 @@ class MNIST:
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.fully_connected(tmp, 512)
 
-
                 if ALI:
                     tmp2 = slim.dropout(z, keep_prob=0.8)
                     tmp2 = slim.fully_connected(tmp2, 512)
@@ -121,6 +122,5 @@ class MNIST:
                 assert gen_images.get_shape().as_list() == [None, 28, 28, 1]
                 return gen_images
 
-    def next_batch(self, batch_size):
-        return self.data.train.next_batch(batch_size)[0]
-
+    def next_batch(self):
+        return self.data.train.next_batch(self.batch_size)[0]

@@ -45,19 +45,19 @@ class VAE(Model_Base):
 
         return loss_value
 
-    def train(self, steps, batch_size):
+    def train(self, steps):
         if tf.gfile.Exists(self.save_dir):
             tf.gfile.DeleteRecursively(self.save_dir)
         tf.gfile.MakeDirs(self.save_dir)
 
         self.sess.run(self.init_op)
-        for i in xrange(steps):
-            image_batch = self.dataset.next_batch(batch_size)
+        for i in range(steps):
+            image_batch = self.dataset.next_batch()
             # sampled z is not actually used, but must be fed in because z_sampled is a placeholder
             loss = self.train_one_step(image_batch)
 
             if i % 10 == 0:
-                print 'Step %d, loss = %f' % (i, loss)
+                print('Step {}, loss = {}'.format(i, loss))
 
             if i % 1000 == 0 or (i+1) == steps:
                 self.saver.save(self.sess, os.path.join(self.save_dir, self.name), global_step=i)
