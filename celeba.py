@@ -21,7 +21,7 @@ class CelebA:
         self.fpaths = glob(img_pattern)
 
         self.x_size = 64*64
-        self.z_size = 128
+        self.z_size = 256
         self.h, self.w, self.ch = 64, 64, 3
         self.real_images = tf.placeholder(tf.float32, shape=[None, self.h, self.w, self.ch])
         self.z_sampled = tf.placeholder(tf.float32, [None, self.z_size])
@@ -46,8 +46,6 @@ class CelebA:
                 features.append(tmp)
                 tmp = slim.fully_connected(tmp, 512)
                 features.append(tmp)
-                # tmp = slim.fully_connected(tmp, 512)
-                # features.append(tmp)
                 mu = slim.fully_connected(tmp, self.z_size, activation_fn=None, normalizer_fn=None)
                 features.append(mu)
                 log_sigma = slim.fully_connected(tmp, self.z_size, activation_fn=None, normalizer_fn=None)
@@ -62,6 +60,7 @@ class CelebA:
                 scope.reuse_variables()
             with slim.arg_scope([slim.fully_connected, slim.conv2d],
                                 activation_fn=custom_ops.leaky_relu,
+                                normalizer_fn=slim.batch_norm,
                                 weights_initializer=INIT()):
                 tmp = slim.conv2d(x, 64, 2, padding='VALID')
                 tmp = slim.conv2d(tmp, 128, 7, stride=2, padding='VALID')
@@ -69,19 +68,6 @@ class CelebA:
                 tmp = slim.conv2d(tmp, 256, 7, stride=2, padding='VALID')
                 tmp = slim.conv2d(tmp, 512, 4, padding='VALID')
                 assert tmp.get_shape().as_list() == [None, 1, 1, 512]
-
-                # tmp = slim.dropout(x, keep_prob=0.8)
-                # tmp = slim.conv2d(tmp, 32, 5, padding='VALID')
-                #
-                # tmp = slim.dropout(tmp, keep_prob=0.5)
-                # tmp = slim.conv2d(tmp, 64, 4, stride=2, padding='VALID')
-                #
-                # tmp = slim.dropout(tmp, keep_prob=0.5)
-                # tmp = slim.conv2d(tmp, 128, 4, padding='VALID')
-                #
-                # tmp = slim.dropout(tmp, keep_prob=0.5)
-                # tmp = slim.conv2d(tmp, 256, 4, stride=2, padding='VALID')
-                # assert tmp.get_shape().as_list() == [None, 3, 3, 256]
 
                 tmp = slim.flatten(tmp)
 
@@ -91,27 +77,29 @@ class CelebA:
                 # what layer should this be at?
                 features = tmp
 
-                tmp = slim.dropout(tmp, keep_prob=0.5)
+                tmp = slim.dropout(tmp, keep_prob=0.8)
                 tmp = slim.fully_connected(tmp, 1024)
 
                 if ALI:
-                    tmp2 = slim.dropout(z, keep_prob=0.8)
-                    tmp2 = slim.fully_connected(tmp2, 1024)
+                    tmp2 = z
+                    tmp2 = slim.fully_connected(tmp2, 1024, normalizer_fn=None)
+                    tmp2 = slim.dropout(tmp2, keep_prob=0.8)
 
-                    tmp2 = slim.dropout(tmp2, keep_prob=0.5)
-                    z_vector = slim.fully_connected(tmp2, 1024)
-                    tmp = tf.concat(1, [tmp, z_vector])
+                    tmp2 = slim.fully_connected(tmp2, 1024, normalizer_fn=None)
+                    tmp2 = slim.dropout(tmp2, keep_prob=0.8)
+                    
+                    tmp = tf.concat(1, [tmp, tmp2])
 
-                tmp = slim.dropout(tmp, keep_prob=0.5)
-                tmp = slim.fully_connected(tmp, 2048)
+                tmp = slim.fully_connected(tmp, 2048, normalizer_fn=None)
+                tmp = slim.dropout(tmp, keep_prob=0.8)
+                
+                tmp = slim.fully_connected(tmp, 2048, normalizer_fn=None)
+                tmp = slim.dropout(tmp, keep_prob=0.8)
 
-                tmp = slim.dropout(tmp, keep_prob=0.5)
-                tmp = slim.fully_connected(tmp, 2048)
-
-                tmp = slim.dropout(tmp, keep_prob=0.5)
                 # what layer should this be concatenated at?
                 tmp = tf.concat(1, [tmp, minibatch_discrim])
-                logits = slim.fully_connected(tmp, 1, activation_fn=None)
+                
+                logits = slim.fully_connected(tmp, 1, normalizer_fn=None, activation_fn=None)
                 if get_features:
                     return logits, features
                 return logits
@@ -122,6 +110,7 @@ class CelebA:
                                 activation_fn=custom_ops.leaky_relu,
                                 normalizer_fn=slim.batch_norm,
                                 weights_initializer=INIT()):
+                # tmp = z
                 tmp = slim.fully_connected(z, 512)
                 tmp = tf.reshape(tmp, [-1, 1, 1, 512])
                 tmp = slim.conv2d_transpose(tmp, 512, 4, padding='VALID')
@@ -139,12 +128,13 @@ class CelebA:
         i, n = self.batch_i, 0
         while n < self.batch_size:
             im = cv.imread(self.fpaths[i])
-            batch[i, :, :, :] = im
+            batch[n, :, :, :] = im
 
             i, n = i+1, n+1
 
             if i == len(self.fpaths):
                 self.batch_i, i = 0, 0
+        self.batch_i = i
         return batch
 
 
@@ -172,3 +162,4 @@ def crop_and_save():
 
 if __name__ == '__main__':
     crop_and_save()
+

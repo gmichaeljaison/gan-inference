@@ -8,7 +8,7 @@ from ae import AE
 from vaegan import VAEGAN
 
 
-_batch_size = 64
+_batch_size = 100
 
 
 def get_model(name):
@@ -22,7 +22,6 @@ def get_model(name):
             raise NotImplementedError
 
         if model == 'ALI':
-            print('michael i sgood')
             return ALI(dataset)
         elif model == 'VAE':
             return VAE(dataset)

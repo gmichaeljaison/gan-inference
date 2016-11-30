@@ -1,6 +1,7 @@
 # Project
 data/*
 log/
+res/
 
 # Python
 __pycache__/

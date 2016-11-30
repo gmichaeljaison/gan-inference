@@ -1,9 +1,12 @@
 import tensorflow as tf
 import numpy as np
+import cv2 as cv
 import os.path
+import logging
+import cv_utils
+import utils
 
 from model_base import Model_Base
-
 
 class ALI(Model_Base):
 
@@ -18,25 +21,19 @@ class ALI(Model_Base):
         self.z_sampled = self.dataset.z_sampled
 
         self.gen_images = self.generator(self.z_sampled)
-        print('generator done')
 
         mu, log_sigma, self.encoder_features = self.encoder(self.real_images)
         eps = tf.truncated_normal([tf.shape(mu)[0], self.z_size])
         self.z_encoded = mu + eps*tf.exp(log_sigma)
-        print('encoder done')
 
         self.real_logits = self.discriminator((self.real_images, self.z_encoded), ALI=True)
         self.gen_logits = self.discriminator((self.gen_images, self.z_sampled), ALI=True, reuse=True)
-        print('disc done')
 
         self.generator_loss, self.discriminator_loss = self.losses()
-        print('losses done')
         self.gen_train_op = self.get_train_op(self.generator_loss, net='generator')
         self.discrim_train_op = self.get_train_op(self.discriminator_loss, net='discriminator')
-        print('op done')
         
         Model_Base.__init__(self)
-        print('model base initiated')
         self.init_op = tf.initialize_all_variables()
 
         self.name = self.dataset.name + '_ALI'
@@ -86,18 +83,25 @@ class ALI(Model_Base):
         if tf.gfile.Exists(self.save_dir):
             tf.gfile.DeleteRecursively(self.save_dir)
         tf.gfile.MakeDirs(self.save_dir)
+        cv_utils.utils.create_dirs('res/{}'.format(self.name))
 
         self.sess.run(self.init_op)
-        for i in range(steps):
+        for i in xrange(steps):
             image_batch = self.dataset.next_batch()
             z = self.get_noise_sample(image_batch.shape[0])
             gen_loss, discrim_loss = self.train_one_step(image_batch, z)
 
             if i % 10 == 0:
-                print('Step {}, gen_loss = {}, discrim_loss = {}'.format(i, gen_loss, discrim_loss))
+                print 'Step %d, gen_loss = %f, discrim_loss = %f' % (i, gen_loss, discrim_loss)
 
             if i % 1000 == 0 or (i+1) == steps:
-                print('save', self.save_dir)
                 self.saver.save(self.sess, os.path.join(self.save_dir, self.name), global_step=i)
-                print('saved model')
+
+            if i > 0 and i % 1000 == 0 or (i+1) == steps:
+                z = self.get_noise_sample(100)
+                gen_images = self.generate(z)
+                gen_grid = utils.img_grid(gen_images)
+                fname = 'res/{}/gen-{:06d}.jpg'.format(self.name, i)
+                cv.imwrite(fname, gen_grid)
+                print('saving gen {}'.format(fname))
 

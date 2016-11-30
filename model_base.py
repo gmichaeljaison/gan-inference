@@ -6,9 +6,7 @@ class Model_Base:
 
     def __init__(self):
         self.saver = tf.train.Saver(max_to_keep=1)
-        print('before sess')
         self.sess = tf.Session()
-        print('after sess')
 
     def get_noise_sample(self, batch_size):
         return np.random.normal(scale=1, size=(batch_size, self.z_size))
@@ -27,5 +25,6 @@ class Model_Base:
 
     def restore(self):
         ckpt = tf.train.latest_checkpoint(os.path.join('./log', self.name))
+        print(ckpt)
         self.saver.restore(self.sess, ckpt)
 
