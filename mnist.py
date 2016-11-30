@@ -11,7 +11,7 @@ class MNIST:
     def __init__(self, batch_size):
         self.batch_size = batch_size
 
-        data = mnist.read_data_sets('MNIST_data')
+        data = mnist.read_data_sets('data/MNIST_data')
         # reshape
         data.train._images = data.train._images.reshape([-1, 28, 28, 1])
         data.validation._images = data.validation._images.reshape([-1, 28, 28, 1])
