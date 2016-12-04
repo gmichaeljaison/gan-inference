@@ -60,8 +60,12 @@ class MNIST:
                 tmp = slim.dropout(x, keep_prob=0.8)
                 tmp = slim.conv2d(tmp, 32, 5, padding='VALID')
 
+                features = tmp
+
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.conv2d(tmp, 64, 4, stride=2, padding='VALID')
+
+                #features = tmp
 
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.conv2d(tmp, 128, 4, padding='VALID')
@@ -74,9 +78,6 @@ class MNIST:
 
                 # what layer should this be at?
                 minibatch_discrim = custom_ops.minibatch_discrimination(tmp, 100)
-
-                # what layer should this be at?
-                features = tmp
 
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.fully_connected(tmp, 512)
@@ -104,8 +105,10 @@ class MNIST:
                     return logits, features
                 return logits
 
-    def generator(self, z):
-        with tf.variable_scope('generator'):
+    def generator(self, z, reuse=False):
+        with tf.variable_scope('generator') as scope:
+            if reuse:
+                scope.reuse_variables()
             with slim.arg_scope([slim.fully_connected, slim.conv2d, slim.conv2d_transpose],
                                 activation_fn=custom_ops.leaky_relu,
                                 normalizer_fn=slim.batch_norm,
