@@ -13,7 +13,9 @@ z = model.inference(image_batch)
 gen_images = model.generate(z)
 
 utils.image_grid(image_batch, (10,10))
-utils.image_grid(gen_images, (10,10))
+fig = utils.image_grid(gen_images, (10,10))
 
 plt.show()
+if sys.argv[2]:
+    fig.savefig(sys.argv[2], bbox_inches='tight')
 

@@ -9,7 +9,9 @@ model = models.get_model(sys.argv[1])
 model.restore()
 z = model.get_noise_sample(100)
 gen_images = model.generate(z)
-utils.image_grid(gen_images, (10,10))
+fig = utils.image_grid(gen_images, (10,10))
 
 plt.show()
+if sys.argv[2]:
+    fig.savefig(sys.argv[2], bbox_inches='tight')
 
