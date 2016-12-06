@@ -5,6 +5,7 @@ from tensorflow.contrib.learn.python.learn.datasets import mnist
 import custom_ops
 
 INIT = lambda: tf.truncated_normal_initializer(stddev=0.01)
+#INIT = tf.contrib.layers.xavier_initializer
 
 class MNIST:
 
@@ -18,8 +19,11 @@ class MNIST:
 
         self.z_size = 32
         self.x_size = 28*28
+        self.ch = 1
         self.real_images = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
         self.z_sampled = tf.placeholder(tf.float32, [None, self.z_size])
+
+        self.s = 3
 
         self.name = 'MNIST'
 
@@ -34,7 +38,7 @@ class MNIST:
                 tmp = slim.conv2d(tmp, 64, 4, stride=2, padding='VALID')
                 tmp = slim.conv2d(tmp, 128, 4, padding='VALID')
                 tmp = slim.conv2d(tmp, 256, 4, stride=2, padding='VALID')
-                assert tmp.get_shape().as_list() == [None, 3, 3, 256]
+                #assert tmp.get_shape().as_list() == [None, 3, 3, 256]
                 tmp = slim.flatten(tmp)
                 features.append(tmp)
                 tmp = slim.fully_connected(tmp, 512)
@@ -72,7 +76,7 @@ class MNIST:
                 
                 tmp = slim.dropout(tmp, keep_prob=0.5)
                 tmp = slim.conv2d(tmp, 256, 4, stride=2, padding='VALID')
-                assert tmp.get_shape().as_list() == [None, 3, 3, 256]
+                #assert tmp.get_shape().as_list() == [None, 3, 3, 256]
 
                 tmp = slim.flatten(tmp)
 
@@ -113,15 +117,15 @@ class MNIST:
                                 activation_fn=custom_ops.leaky_relu,
                                 normalizer_fn=slim.batch_norm,
                                 weights_initializer=INIT()):
-                tmp = slim.fully_connected(z, 256*3*3)
-                tmp = tf.reshape(tmp, [-1, 3, 3, 256])
+                tmp = slim.fully_connected(z, 256*self.s*self.s)
+                tmp = tf.reshape(tmp, [-1, self.s, self.s, 256])
                 tmp = slim.conv2d_transpose(tmp, 128, 4, stride=2, padding='VALID')
                 tmp = slim.conv2d_transpose(tmp, 64, 4, padding='VALID')
                 tmp = slim.conv2d_transpose(tmp, 32, 4, stride=2, padding='VALID')
                 tmp = slim.conv2d_transpose(tmp, 32, 5, padding='VALID')
                 tmp = slim.conv2d(tmp, 32, 1, padding='VALID')
-                gen_images = slim.conv2d(tmp, 1, 1, padding='VALID', activation_fn=tf.nn.sigmoid, normalizer_fn=None)
-                assert gen_images.get_shape().as_list() == [None, 28, 28, 1]
+                gen_images = slim.conv2d(tmp, self.ch, 1, padding='VALID', activation_fn=tf.nn.sigmoid, normalizer_fn=None)
+                #assert gen_images.get_shape().as_list() == [None, 28, 28, 1]
                 return gen_images
 
     def next_batch(self, batch_size):

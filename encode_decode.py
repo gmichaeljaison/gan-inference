@@ -16,6 +16,6 @@ utils.image_grid(image_batch, (10,10))
 fig = utils.image_grid(gen_images, (10,10))
 
 plt.show()
-if sys.argv[2]:
+if len(sys.argv) == 3:
     fig.savefig(sys.argv[2], bbox_inches='tight')
 

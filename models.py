@@ -1,5 +1,6 @@
 import tensorflow as tf
 from mnist import MNIST
+from cifar import CIFAR
 from ali import ALI
 from vae import VAE
 from ae import AE
@@ -10,6 +11,8 @@ def get_model(name):
     with tf.Graph().as_default():
         if dataset == 'MNIST':
             dataset = MNIST()
+        elif dataset == 'CIFAR':
+            dataset = CIFAR()
         else:
             raise NotImplementedError
 
