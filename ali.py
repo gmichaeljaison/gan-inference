@@ -61,7 +61,7 @@ class ALI(Model_Base):
         else:
             raise RuntimeError('Net to train must be one of: generator, discriminator')
 
-        train_op = tf.train.AdamOptimizer(0.0001, beta1=0.5).minimize(loss, var_list=variables)
+        train_op = tf.train.AdamOptimizer(0.001, beta1=0.5).minimize(loss, var_list=variables)
         return train_op
 
     def train_one_step(self, image_batch, z):

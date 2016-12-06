@@ -126,8 +126,11 @@ class CelebA:
         batch = np.zeros((self.batch_size, self.h, self.w, self.ch))
 
         i, n = self.batch_i, 0
-        while n < self.batch_size:
+        while n < self.batch_size:  
             im = cv.imread(self.fpaths[i])
+            im = cv.cvtColor(im, cv.COLOR_BGR2RGB) # add this line
+            im = im.astype(np.float32) / 255. # add this line
+
             batch[n, :, :, :] = im
 
             i, n = i+1, n+1

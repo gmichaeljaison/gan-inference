@@ -1,6 +1,4 @@
 # Project
-MNIST_data/
-MNIST-data/
 data/*
 log/
 res/
