@@ -12,8 +12,9 @@ image_batch = model.dataset.data.validation.next_batch(100)[0]
 z = model.inference(image_batch)
 gen_images = model.generate(z)
 
-utils.image_grid(image_batch, (10,10))
-fig = utils.image_grid(gen_images, (10,10))
+#utils.image_grid(image_batch, (10,10))
+#fig = utils.image_grid(gen_images, (10,10))
+fig = utils.images_and_reconstructions(image_batch, gen_images, (10,10))
 
 plt.show()
 if len(sys.argv) == 3:
