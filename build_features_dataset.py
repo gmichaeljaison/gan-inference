@@ -7,7 +7,7 @@ import models
 
 model = models.get_model(sys.argv[1])
 model.restore()
-data = model.data
+data = model.dataset.data
 
 features_dataset = {}
 for name, dataset in [('train', data.train),
